@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         DOCKER_HOST = 'tcp://localhost:2375'  // Docker Host URI for Docker Desktop on Windows
-        DOCKER_CERT_PATH = ''  // Leave empty on Windows
         DOCKER_TLS_VERIFY = '0'  // Disable TLS verification
     }
 
