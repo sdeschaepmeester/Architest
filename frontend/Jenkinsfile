@@ -11,11 +11,11 @@ pipeline {
         stage('Build') {
             steps {
                 // Checkout the source code from Git
-                git 'https://github.com/sdeschaepmeester/Architest.git'
+                git url: 'https://github.com/sdeschaepmeester/Architest.git', branch: 'main'
                 
-                // Build the Docker image
+                // Build the Docker image from frontend subfolder
                 script {
-                    docker.build('frontend-test', '-f frontend/Dockerfile .')
+                    docker.build('frontend-test', '-f frontend/Dockerfile frontend')
                 }
             }
         }
@@ -23,17 +23,15 @@ pipeline {
             steps {
                 // Push the Docker image to Docker Hub or your registry
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
                         docker.image('frontend-test').push()
                     }
-                    
                     // Run the Docker container
                     sh 'docker run -p 8081:80 frontend-test'
                 }
             }
         }
     }
-    
     post {
         success {
             echo 'Pipeline successful!'
