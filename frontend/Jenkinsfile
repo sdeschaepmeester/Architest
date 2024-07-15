@@ -1,0 +1,45 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_HOST = 'tcp://localhost:2375'  // Docker Host URI for Docker Desktop on Windows
+        DOCKER_CERT_PATH = ''  // Leave empty on Windows
+        DOCKER_TLS_VERIFY = '0'  // Disable TLS verification
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                // Checkout the source code from Git
+                git 'https://github.com/sdeschaepmeester/Architest.git'
+                
+                // Build the Docker image
+                script {
+                    docker.build('frontend-test', '-f frontend/Dockerfile .')
+                }
+            }
+        }
+        stage('Deploy') {
+            steps {
+                // Push the Docker image to Docker Hub or your registry
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
+                        docker.image('frontend-test').push()
+                    }
+                    
+                    // Run the Docker container
+                    sh 'docker run -p 8081:80 frontend-test'
+                }
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo 'Pipeline successful!'
+        }
+        failure {
+            echo 'Pipeline failed!'
+        }
+    }
+}
